@@ -36,6 +36,20 @@ successful apply, so a pull with no config changes costs nothing.
 | `home.nix` | user-level: CLI packages, dotfile symlinks |
 | `dotfiles/` | `.zshrc`, `.gitconfig` — symlinked into `$HOME`, editable in place |
 
+## What's installed
+
+`git` · `zsh` · `oh-my-zsh` · `powerlevel10k` · `tmux` · `k9s` · `kubectl` ·
+`bat` · `htop` · `jq`, plus `direnv` (load-bearing for the monorepo devshells)
+and the `zsh-autosuggestions` / `zsh-syntax-highlighting` plugins.
+
+Two things on the wish-list are not installable this way:
+
+- **cmux** is a GUI app and is not in nixpkgs. Only `~/.config/cmux/cmux.json`
+  is managed here.
+- **claude-code** is in nixpkgs at 2.1.39 while the self-updating install in
+  `~/.local/share/claude/versions` is far ahead. Adding it would shadow the
+  newer build with an older one, so it is left commented out in `home.nix`.
+
 ## Things that are load-bearing
 
 **`nix.enable = false` in `darwin.nix`.** This machine runs Determinate Nix, and
