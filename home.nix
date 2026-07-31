@@ -20,11 +20,18 @@ in
   ##############################################################################
   home.packages = with pkgs; [
     git
+    gh # .gitconfig's credential helper shells out to this
     k9s # aliased to `kk`
     kubectl # aliased to `k`
     bat
     htop
     jq
+
+    # powerlevel10k renders with POWERLEVEL9K_MODE=nerdfont-v3, so it needs a
+    # Nerd Font present or the prompt shows tofu boxes. This was installed by
+    # hand here (by the `p10k configure` wizard); declaring it means a fresh
+    # machine gets a working prompt with no manual step.
+    nerd-fonts.meslo-lg
   ];
 
   # Not on the keep-list, but load-bearing: every monorepo devshell loads
