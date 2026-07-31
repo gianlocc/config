@@ -17,6 +17,18 @@
   nix.enable = false;
   determinateNix.enable = true;
 
+  # The determinate module *does* generate /etc/nix/nix.custom.conf, which is
+  # the same file setup_nix.sh appends Exa's cache settings to. Anything only
+  # appended there gets wiped on the next switch, so declare it here instead --
+  # then it survives every rebuild and setup_nix.sh's append becomes a no-op.
+  nix.settings = {
+    trusted-users = [ "root" "@admin" ];
+    extra-substituters = [ "s3://exa-nix-cache?region=us-west-2&priority=50" ];
+    extra-trusted-public-keys = [
+      "exa-nix-s3-cache-1:mxdfgAYd0CqvvfP9XaOnE1i7lrUACRIIt68iShEGKCA="
+    ];
+  };
+
   system.stateVersion = 6;
   system.primaryUser = username;
 
