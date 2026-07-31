@@ -14,14 +14,16 @@
   # Rust builds. With `nix.enable = false`, nix-darwin leaves it alone and
   # setup_nix.sh keeps writing to /etc/nix/nix.custom.conf.
   ##############################################################################
-  nix.enable = false;
+  # The module itself does `nix.enable = lib.mkForce false`, so nix-darwin's own
+  # nix.conf generation is off and Determinate stays in charge.
   determinateNix.enable = true;
 
-  # The determinate module *does* generate /etc/nix/nix.custom.conf, which is
-  # the same file setup_nix.sh appends Exa's cache settings to. Anything only
-  # appended there gets wiped on the next switch, so declare it here instead --
-  # then it survives every rebuild and setup_nix.sh's append becomes a no-op.
-  nix.settings = {
+  # The module *does* generate /etc/nix/nix.custom.conf -- the same file
+  # setup_nix.sh appends Exa's cache settings to. Anything merely appended there
+  # is wiped on the next switch, so it has to be declared here instead. Note
+  # this is `determinateNix.customSettings`, NOT `nix.settings`; the latter is
+  # silently ignored once the determinate module is in play.
+  determinateNix.customSettings = {
     trusted-users = [ "root" "@admin" ];
     extra-substituters = [ "s3://exa-nix-cache?region=us-west-2&priority=50" ];
     extra-trusted-public-keys = [
