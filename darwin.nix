@@ -45,33 +45,17 @@
 
   environment.shells = [ pkgs.zsh ];
 
-  # macOS settings that are otherwise a pile of `defaults write` you forget.
-  # Deliberately conservative -- nothing here changes muscle memory.
-  system.defaults = {
-    NSGlobalDomain = {
-      InitialKeyRepeat = 15; # ~225ms before key repeat kicks in
-      KeyRepeat = 2; # fast repeat
-      AppleShowAllExtensions = true;
-      ApplePressAndHoldEnabled = false; # key repeat instead of accent popup
-      NSAutomaticCapitalizationEnabled = false;
-      NSAutomaticDashSubstitutionEnabled = false;
-      NSAutomaticQuoteSubstitutionEnabled = false;
-      NSAutomaticSpellingCorrectionEnabled = false;
-    };
-
-    dock = {
-      autohide = true;
-      show-recents = false;
-      mru-spaces = false; # stop spaces reordering themselves
-    };
-
-    finder = {
-      AppleShowAllExtensions = true;
-      ShowPathbar = true;
-      ShowStatusBar = true;
-      FXPreferredViewStyle = "Nlsv"; # list view
-      FXEnableExtensionChangeWarning = false;
-    };
+  # Typing behaviour only. Dock and Finder are deliberately left alone so this
+  # config never rearranges the desktop out from under you -- add
+  # `system.defaults.dock` / `.finder` here if you ever want that.
+  system.defaults.NSGlobalDomain = {
+    InitialKeyRepeat = 15; # ~225ms before key repeat kicks in
+    KeyRepeat = 2; # fast repeat
+    ApplePressAndHoldEnabled = false; # key repeat instead of the accent popup
+    NSAutomaticCapitalizationEnabled = false;
+    NSAutomaticDashSubstitutionEnabled = false;
+    NSAutomaticQuoteSubstitutionEnabled = false;
+    NSAutomaticSpellingCorrectionEnabled = false;
   };
 
   ##############################################################################
