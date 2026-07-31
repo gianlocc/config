@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Fires on `git pull --rebase`, which does NOT trigger post-merge.
+# Git passes "rebase" or "amend" as $1; only the former is a pull.
+set -uo pipefail
+[[ "${1:-}" == "rebase" ]] || exit 0
+"$(git rev-parse --show-toplevel)/bin/sync" || {
+  echo "==> configs: sync failed; run 'bin/sync --force' to retry" >&2
+  exit 0
+}

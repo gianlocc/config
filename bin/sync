@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+#
+# Applies this repo to the machine. Safe to run any number of times.
+#
+#   bin/sync            # rebuild only if HEAD moved since the last successful sync
+#   bin/sync --force    # rebuild unconditionally (use after editing files locally)
+#
+# This is what the post-merge / post-rewrite hooks call, so a plain `git pull`
+# picks up config changes on its own.
+
+set -euo pipefail
+
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$REPO"
+
+FLAKE="${REPO}#default"
+# Kept in .git/ so it is per-machine and never committed.
+STATE="${REPO}/.git/last-synced"
+
+FORCE=false
+[[ "${1:-}" == "--force" ]] && FORCE=true
+
+HEAD_SHA="$(git rev-parse HEAD 2>/dev/null || echo unknown)"
+
+if [[ "$FORCE" == false && -f "$STATE" && "$(cat "$STATE")" == "$HEAD_SHA" ]]; then
+  exit 0
+fi
+
+echo ""
+echo "==> configs: applying $(git log -1 --format='%h %s' 2>/dev/null || echo 'working tree')"
+
+if ! command -v darwin-rebuild >/dev/null 2>&1; then
+  echo "==> darwin-rebuild not found; bootstrapping nix-darwin"
+  sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake "$FLAKE"
+else
+  sudo darwin-rebuild switch --flake "$FLAKE"
+fi
+
+echo "$HEAD_SHA" >"$STATE"
+echo "==> configs: done"

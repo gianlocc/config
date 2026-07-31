@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Fires on `git pull` (the default merge path).
+# Exit status of post-merge is ignored by git, so a failed rebuild never
+# leaves the pull itself in a bad state.
+set -uo pipefail
+"$(git rev-parse --show-toplevel)/bin/sync" || {
+  echo "==> configs: sync failed; run 'bin/sync --force' to retry" >&2
+  exit 0
+}
