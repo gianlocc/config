@@ -63,6 +63,23 @@ Only `settings.json` and `CLAUDE.md` are symlinked — never the whole `~/.claud
 directory, which also holds credentials, ~1.4MB of `history.jsonl` and 26
 project transcripts.
 
+### Claude Code settings
+
+`dotfiles/claude/settings.json` carries a `$schema` pointer, so editors
+autocomplete and validate it against the published schema.
+
+Git attribution is fully suppressed and pinned explicitly rather than left to
+defaults: `attribution.commit` and `.pr` are empty strings, `.sessionUrl` is
+`false`, and `includeCoAuthoredBy` is `false`. The first two already suppressed
+everything in practice (verified: zero trailers across 60 real commits), but
+`sessionUrl` and `includeCoAuthoredBy` both default to `true`, so stating them
+means a future default change can't quietly start tagging commits.
+
+Two keys — `skipAutoPermissionPrompt` and `skipWorkflowUsageWarning` — are not
+in the published schema. They are kept because schemastore lags new Claude Code
+releases and removing a working setting is worse than carrying an ignored one.
+Drop them if a future schema still doesn't recognise them.
+
 ## Load-bearing details
 
 **`nix.enable = false` in `darwin.nix`.** This machine runs Determinate Nix,
