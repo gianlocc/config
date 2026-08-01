@@ -42,6 +42,23 @@
   },
 
   "automation": {
+    // Explicit rather than relying on the default, since this is the whole
+    // point of the setup. cmux hooks Claude Code by injecting a shim earlier
+    // on PATH than ~/.local/bin/claude.
+    //
+    // claudeBinaryPath is deliberately left unset: cmux auto-detects, and its
+    // shim lives at a per-session temp path, so pinning one would bypass the
+    // integration and go stale.
+    "claudeCodeIntegration": true,
+
+    // Only claude and codex are actually installed here. These four ship
+    // enabled by default; switching them off keeps their bundled plugins
+    // inactive. Flip one back on if you start using that agent.
+    "ampIntegration": false,
+    "cursorIntegration": false,
+    "geminiIntegration": false,
+    "kiroIntegration": false,
+
     // Names workspaces from their content instead of leaving a wall of
     // identical titles once several are open.
     "workspaceAutoNaming": true
