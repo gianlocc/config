@@ -98,8 +98,10 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 #
 # The cask list is read back out of the flake so this never drifts from
 # darwin.nix. --adopt is harmless when the app isn't installed yet.
-CASKS=$(nix eval --json "$REPO#darwinConfigurations.default.config.homebrew.casks" 2>/dev/null |
-  tr -d '[]"' | tr ',' ' ')
+# casks are submodules, not plain strings, so pull .name out in Nix rather
+# than trying to unpick the JSON in shell.
+CASKS=$(nix eval --raw "$REPO#darwinConfigurations.default.config.homebrew.casks" \
+  --apply 'cs: builtins.concatStringsSep " " (map (c: c.name) cs)' 2>/dev/null)
 for cask in $CASKS; do
   if brew list --cask "$cask" >/dev/null 2>&1; then
     echo "already brew-managed: $cask"
