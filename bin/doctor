@@ -85,14 +85,26 @@ subs=$(nix config show substituters 2>/dev/null | tr ' ' '\n' | grep -c . || ech
 ################################################################################
 hdr "packages"
 ################################################################################
+TOOLS="git gh zsh tmux k9s kubectl bat jq direnv node npm pnpm bun yarn python3 uv"
+
 P="/etc/profiles/per-user/$USER/bin"
 missing=""
-for t in git gh zsh tmux k9s kubectl bat jq direnv; do
+for t in $TOOLS; do
   [[ -x "$P/$t" ]] || missing+="$t "
 done
 [[ -z "$missing" ]] &&
-  ok "nix packages" "all present" ||
-  bad "nix packages" "missing: $missing"
+  ok "nix packages" "installed" ||
+  bad "nix packages" "not in profile: $missing"
+
+# Existence is not reachability. A clean login shell is used deliberately:
+# this shell may have inherited __ETC_ZSHENV_SOURCED=1, which makes /etc/zshenv
+# return early and hides the real PATH.
+unreachable=$(env -i HOME="$HOME" USER="$USER" TERM=dumb \
+  "$P/zsh" -l -i -c "for t in $TOOLS; do command -v \$t >/dev/null 2>&1 || printf '%s ' \$t; done" \
+  2>/dev/null)
+[[ -z "$unreachable" ]] &&
+  ok "  on PATH" "all resolve in a clean login shell" ||
+  bad "  on PATH" "installed but NOT resolvable: $unreachable"
 
 fonts=$(find "$HOME/Library/Fonts/HomeManager" -name '*.ttf' 2>/dev/null | wc -l | tr -d ' ')
 [[ "$fonts" -gt 0 ]] &&

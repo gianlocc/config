@@ -14,9 +14,12 @@ in
   ##############################################################################
   # Tools.
   #
-  # Language toolchains (node, python, rust, go) deliberately do NOT belong
-  # here -- those come from per-project devshells via direnv, and a global
-  # copy would shadow the pinned versions there.
+  # Language toolchains ARE global here, by choice. The usual worry is that a
+  # global node/python shadows a project's pinned one -- verified not to happen:
+  # direnv *prepends* the devshell to PATH on directory entry, so inside e.g. a
+  # monorepo every tool still resolves to the devshell copy, even where the
+  # global version is newer. Checked against git, gh, jq, kubectl, node, python3,
+  # rustc, cargo and go.
   ##############################################################################
   home.packages = with pkgs; [
     git
@@ -26,6 +29,22 @@ in
     bat
     htop
     jq
+
+    # --- JavaScript -------------------------------------------------------
+    # Volta used to supply node/npm/pnpm/yarn, but it is no longer on PATH in a
+    # fresh shell, so `node` was simply missing. These replace it. nodejs ships
+    # npm, so npm is not listed separately.
+    nodejs_24
+    pnpm
+    bun
+    yarn # Volta provided this too; kept so nothing silently disappears
+
+    # --- Python -----------------------------------------------------------
+    # 3.13 rather than pkgs.python3, which is currently 3.14 and too new for a
+    # lot of tooling. uv is here because .zshrc sets UV_PYTHON_PREFERENCE=managed
+    # and it manages its own interpreters for projects regardless.
+    python313
+    uv
 
     # powerlevel10k renders with POWERLEVEL9K_MODE=nerdfont-v3, so it needs a
     # Nerd Font present or the prompt shows tofu boxes. This was installed by
