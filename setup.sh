@@ -16,7 +16,7 @@ say() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
 warn() { printf '\n\033[1;33m!!  %s\033[0m\n' "$*"; }
 
 ################################################################################
-say "1/5  Nix"
+say "1/6  Nix"
 ################################################################################
 if command -v nix >/dev/null 2>&1; then
   echo "already installed: $(nix --version)"
@@ -29,7 +29,7 @@ else
 fi
 
 ################################################################################
-say "2/5  git hooks"
+say "2/6  git hooks"
 ################################################################################
 # Repo-local, so it overrides the global core.hooksPath (which points at
 # work-book/githooks) for this repo only. Tracked in git, so a fresh clone
@@ -39,7 +39,7 @@ chmod +x hooks/* bin/* setup.sh
 echo "core.hooksPath -> hooks/  (post-merge, post-rewrite)"
 
 ################################################################################
-say "3/5  backing up nix.conf"
+say "3/6  backing up nix.conf"
 ################################################################################
 # This config sets nix.enable = false precisely so nix-darwin never rewrites
 # /etc/nix/nix.conf. Snapshot it anyway before the first switch.
@@ -54,12 +54,34 @@ if [[ -f /etc/nix/nix.conf ]]; then
 fi
 
 ################################################################################
-say "4/5  applying the config"
+say "4/6  Homebrew"
+################################################################################
+# darwin.nix declares casks, and the homebrew module needs brew to already
+# exist at switch time.
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  echo "already installed: $(/opt/homebrew/bin/brew --version | head -1)"
+else
+  echo "installing Homebrew..."
+  NONINTERACTIVE=1 /bin/bash -c \
+    "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# cmux is already in /Applications from a manual install. brew refuses to
+# install over an existing app, so adopt it first -- otherwise the switch fails
+# with "It seems there is already an App at /Applications/cmux.app".
+if [[ -d /Applications/cmux.app ]] && ! brew list --cask cmux >/dev/null 2>&1; then
+  echo "adopting the existing /Applications/cmux.app into brew..."
+  brew install --cask --adopt cmux || warn "adopt failed; remove /Applications/cmux.app and re-run"
+fi
+
+################################################################################
+say "5/6  applying the config"
 ################################################################################
 "$REPO/bin/sync" --force
 
 ################################################################################
-say "5/5  cleaning up imperative installs"
+say "6/6  cleaning up imperative installs"
 ################################################################################
 # These are now declared in home.nix. Leaving the `nix profile` copies around
 # means two sources of truth and a stale binary shadowing the managed one.
@@ -83,9 +105,13 @@ cat <<'EOF'
 
   Two things worth knowing:
 
-  * ~/.zshrc and ~/.gitconfig are now symlinks into dotfiles/ in this repo.
-    Edit them wherever you like -- it is the same file. Commit when you care.
-    Your originals were kept as ~/.zshrc.hm-bak and ~/.gitconfig.hm-bak.
+  * ~/.zshrc is now GENERATED from home.nix -- editing it directly does
+    nothing lasting. Change programs.zsh in home.nix and re-sync instead.
+    ~/.gitconfig, ~/.p10k.zsh and cmux.json are symlinks into dotfiles/ and
+    ARE editable in place. Originals were kept as <file>.hm-bak.
+
+  * Your ~/.oh-my-zsh clone and ~/.tmux.conf are no longer used and can be
+    deleted once the new shell looks right.
 
   * If Exa's Rust builds start missing the cache, re-run
     ~/Develop/monorepo/bin/setup_nix.sh once. It rewrites the sccache and

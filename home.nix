@@ -97,7 +97,16 @@ in
         export PATH="$HOME/.local/bin:/Applications/PyCharm.app/Contents/MacOS:$PATH"
         export PATH="$HOME/.nix-profile/bin:$PATH"
 
-        export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+        # Guarded: with no JDK 17 present, java_home prints "Unable to locate a
+        # Java Runtime" to stderr on every single shell start. The old .zshrc
+        # called it unconditionally and did exactly that.
+        if /usr/libexec/java_home -v 17 >/dev/null 2>&1; then
+          export JAVA_HOME="$(/usr/libexec/java_home -v 17)"
+        fi
+
+        # Homebrew (casks are declared in darwin.nix).
+        [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+
         export TILT_NAMESPACE=exan-gianlorenzo
         export UV_PYTHON_PREFERENCE=managed
 

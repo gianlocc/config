@@ -59,17 +59,22 @@
   };
 
   ##############################################################################
-  # GUI apps -- intentionally OFF.
+  # GUI apps, via Homebrew casks.
   #
-  # There are ~40 apps already in /Applications, installed by hand, and several
-  # of them self-update or ship system extensions (Docker, 1Password, Tailscale,
-  # LuLu). Turning this on would have brew try to adopt or reinstall all of them.
-  # Enable it deliberately, a few casks at a time, once you want that.
+  # Deliberately a short list. There are ~40 apps in /Applications installed by
+  # hand, and several self-update or ship system extensions (Docker, 1Password,
+  # Tailscale, LuLu); listing those here would have brew fight their updaters.
+  # `cleanup = "none"` guarantees nothing not named here is ever uninstalled.
   #
-  # homebrew = {
-  #   enable = true;
-  #   onActivation.cleanup = "none";  # never uninstall anything not listed
-  #   casks = [ "ghostty" "rectangle" "cleanshot" ];
-  # };
+  # cmux is not in nixpkgs, so brew is the only declarative option for it.
   ##############################################################################
+  homebrew = {
+    enable = true;
+    casks = [ "cmux" ];
+    onActivation = {
+      cleanup = "none"; # never touch apps that aren't listed above
+      autoUpdate = false; # don't run `brew update` on every switch
+      upgrade = false; # don't silently upgrade casks on every switch
+    };
+  };
 }
