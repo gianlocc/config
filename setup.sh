@@ -15,6 +15,16 @@ cd "$REPO"
 say() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
 warn() { printf '\n\033[1;33m!!  %s\033[0m\n' "$*"; }
 
+# home.nix points the dotfile symlinks at $HOME/Develop/configs. Cloning
+# somewhere else builds fine but silently produces dangling ~/.gitconfig and
+# ~/.p10k.zsh symlinks, so refuse rather than half-work.
+EXPECTED="$HOME/Develop/configs"
+if [[ "$REPO" != "$EXPECTED" ]]; then
+  warn "this repo must live at $EXPECTED (found: $REPO)"
+  warn "move it there and re-run, or change \`repo\` in home.nix to match."
+  exit 1
+fi
+
 ################################################################################
 say "1/6  Nix"
 ################################################################################
