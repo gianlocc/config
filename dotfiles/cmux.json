@@ -24,9 +24,10 @@
   },
 
   "notifications": {
-    // Distinct from the system default chime, so an agent finishing is
-    // audibly different from every other macOS notification.
-    "sound": "Glass",
+    // Soft breathy swell rather than a sharp chime -- distinct from the system
+    // default, so an agent finishing sounds different from every other macOS
+    // notification without being startling.
+    "sound": "Blow",
     // Don't notify about the pane you're already looking at.
     "suppressOnlyFocusedSurface": true
   },
