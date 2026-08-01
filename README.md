@@ -18,6 +18,11 @@ That installs Nix if missing, wires up the git hooks, and applies the config.
 | `git pull` | applies any change that came down, automatically |
 | `bin/sync --force` | applies uncommitted local edits |
 | `darwin-rebuild --rollback` | undoes the last switch |
+| `./uninstall.sh` | rolls back, restores your dotfiles, unhooks git |
+| `./uninstall.sh --purge` | the above, plus removes nix-darwin entirely |
+
+Neither uninstall mode removes Nix itself; for that, run
+`/nix/nix-installer uninstall` afterwards.
 
 The automatic part is `core.hooksPath = hooks/` (set by `setup.sh`), plus:
 
