@@ -2,6 +2,53 @@
   "$schema": "https://raw.githubusercontent.com/manaflow-ai/cmux/main/web/data/cmux.schema.json",
   "schemaVersion": 1,
 
+  // ---------------------------------------------------------------------
+  // Active settings.
+  //
+  // Only values that DIFFER from cmux's defaults are listed. The good
+  // agent-facing defaults are already on and are deliberately not repeated
+  // here: dockBadge, unreadPaneRing, paneFlash, watchGitStatus,
+  // showPullRequests, showPorts, showAgentActivity, claudeCodeIntegration
+  // and autoResumeAgentSessions are all true out of the box.
+  //
+  // Everything below the divider is cmux's own commented template, kept as
+  // reference for what else can be set.
+  // ---------------------------------------------------------------------
+
+  "terminal": {
+    // Select text and it's on the clipboard; no extra cmd+c.
+    "copyOnSelect": true,
+    // Show the prompt box on every new terminal rather than only on demand,
+    // since most surfaces here end up driving an agent.
+    "showTextBoxOnNewTerminals": true
+  },
+
+  "notifications": {
+    // Distinct from the system default chime, so an agent finishing is
+    // audibly different from every other macOS notification.
+    "sound": "Glass",
+    // Don't notify about the pane you're already looking at.
+    "suppressOnlyFocusedSurface": true
+  },
+
+  "sidebar": {
+    // Branch on the same row as the workspace: more rows visible at once
+    // when several agents are running.
+    "branchLayout": "inline"
+  },
+
+  "browser": {
+    "defaultSearchEngine": "exa"
+  },
+
+  "automation": {
+    // Names workspaces from their content instead of leaving a wall of
+    // identical titles once several are open.
+    "workspaceAutoNaming": true
+  },
+
+  // ---------------------------------------------------------------------
+
   // This file uses JSON with comments (JSONC).
   // Uncomment and edit any setting to make it file-managed.
   // Remove a setting to fall back to the value saved in Settings.
