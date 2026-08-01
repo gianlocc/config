@@ -118,6 +118,15 @@ in
         alias k="kubectl"
         alias kk="k9s"
 
+        # Claude Code. Resolved at call time, so inside cmux this picks up the
+        # shim cmux injects ahead of ~/.local/bin (which is how its Claude Code
+        # integration hooks in), and outside cmux it runs the binary directly.
+        #
+        # This shadows /usr/bin/cc (Apple clang) -- but only on the interactive
+        # command line. make/cargo/nix exec `cc` directly and are unaffected.
+        # Use `command cc` or /usr/bin/cc if you ever want the compiler here.
+        alias cc="claude"
+
         # Machine- and work-specific settings live outside this repo so it can
         # stay publishable: ~/.zsh_secrets for credentials, ~/.zshrc.local for
         # employer-specific env vars, aliases and paths. Neither is tracked.

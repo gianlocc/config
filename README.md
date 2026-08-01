@@ -89,6 +89,14 @@ settings across every switch. This deliberately does *not* use Determinate's
 nix-darwin module — that module regenerates `nix.custom.conf` on activation and
 would silently drop any setting written there by anything else.
 
+The migration hazard, hit once on this machine: if nix-darwin *previously*
+managed `nix.conf`, flipping `nix.enable` to `false` makes it **delete** that
+file. `trusted-users` goes with it, demoting your account to untrusted, at which
+point nix silently ignores your substituters, trusted-public-keys and
+netrc-file — every build then misses the cache while appearing to work.
+`setup.sh` snapshots `nix.conf` to `/etc/nix/nix.conf.pre-configs`, restores it
+if it disappears, restarts the daemon, and warns if you are not trusted.
+
 **The repo must live at `~/Develop/configs`.** `home.nix` points the dotfile
 symlinks at that path. Cloning elsewhere builds fine but produces dangling
 `~/.gitconfig` and `~/.p10k.zsh`, so `setup.sh` refuses rather than half-work.

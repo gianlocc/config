@@ -64,18 +64,42 @@ chmod +x hooks/* bin/* setup.sh
 echo "core.hooksPath -> hooks/  (post-merge, post-rewrite)"
 
 ################################################################################
-say "3/7  backing up nix.conf"
+say "3/7  /etc/nix/nix.conf"
 ################################################################################
-# This config sets nix.enable = false precisely so nix-darwin never rewrites
-# /etc/nix/nix.conf. Snapshot it anyway before the first switch.
+# This config sets nix.enable = false so nix-darwin never rewrites nix.conf --
+# whatever else owns that file (Determinate, or a work bootstrap script) keeps
+# its settings across every switch.
+#
+# The catch on a machine that previously HAD a nix-darwin-managed nix.conf:
+# switching nix.enable to false makes nix-darwin delete the file it used to
+# own. That silently drops `trusted-users`, which demotes your account to
+# untrusted -- at which point nix ignores your substituters, trusted-public-keys
+# and netrc-file, and every build starts missing the cache.
+#
+# So: snapshot it, and put it back if it went missing.
+BACKUP="/etc/nix/nix.conf.pre-configs"
 if [[ -f /etc/nix/nix.conf ]]; then
-  BACKUP="/etc/nix/nix.conf.pre-configs"
   if [[ ! -f "$BACKUP" ]]; then
     sudo cp /etc/nix/nix.conf "$BACKUP"
     echo "saved $BACKUP"
   else
     echo "backup already exists: $BACKUP"
   fi
+elif [[ -f "$BACKUP" ]]; then
+  warn "/etc/nix/nix.conf is missing; restoring from $BACKUP"
+  sudo cp "$BACKUP" /etc/nix/nix.conf
+  # trusted-users is read by the daemon, so it needs a restart to take effect.
+  sudo launchctl kickstart -k system/org.nixos.nix-daemon 2>/dev/null ||
+    warn "could not restart the nix daemon; reboot or restart it manually"
+  echo "restored, daemon restarted"
+else
+  echo "no nix.conf and no backup; leaving it to Determinate"
+fi
+
+# Cheap canary: an untrusted user means the cache settings are being ignored.
+if ! nix config show trusted-users 2>/dev/null | grep -qE '@admin|\b'"$USER"'\b'; then
+  warn "you are not in nix's trusted-users; substituters and netrc will be ignored."
+  warn "current: $(nix config show trusted-users 2>/dev/null)"
 fi
 
 ################################################################################
