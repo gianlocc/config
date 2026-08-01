@@ -25,7 +25,7 @@ PURGE=false
 [[ "${1:-}" == "--purge" ]] && PURGE=true
 
 ################################################################################
-say "1/5  unhooking git"
+say "1/4  unhooking git"
 ################################################################################
 # Drops back to the global hooksPath (work-book/githooks), which was never
 # modified. `git pull` here stops triggering rebuilds.
@@ -39,7 +39,7 @@ rm -f .git/last-synced
 ok "cleared sync state"
 
 ################################################################################
-say "2/5  restoring dotfiles"
+say "2/4  restoring dotfiles"
 ################################################################################
 # home-manager replaces these with symlinks and keeps the original as
 # <file>.hm-bak. Put the originals back; where there is no backup, just drop
@@ -76,7 +76,7 @@ rm -rf "$HOME/Library/Fonts/HomeManager"
 ok "removed ~/.zsh/plugins and ~/Library/Fonts/HomeManager"
 
 ################################################################################
-say "3/5  reverting the system"
+say "3/4  reverting the system"
 ################################################################################
 if [[ "$PURGE" == true ]]; then
   if command -v darwin-uninstaller >/dev/null 2>&1; then
@@ -100,7 +100,7 @@ else
 fi
 
 ################################################################################
-say "4/5  restoring /etc/nix/nix.conf"
+say "4/4  restoring /etc/nix/nix.conf"
 ################################################################################
 BACKUP="/etc/nix/nix.conf.pre-configs"
 if [[ -f "$BACKUP" ]]; then
@@ -108,18 +108,6 @@ if [[ -f "$BACKUP" ]]; then
   ok "restored nix.conf from $BACKUP"
 else
   ok "no backup found; leaving nix.conf as-is"
-fi
-
-################################################################################
-say "5/5  work setup"
-################################################################################
-EXA_SETUP="$HOME/Develop/monorepo/bin/setup_nix.sh"
-if [[ -x "$EXA_SETUP" ]]; then
-  warn "Exa's cache settings were declared in this config and are now gone."
-  warn "Re-run this to put them back (it is idempotent):"
-  echo "      $EXA_SETUP"
-else
-  ok "monorepo setup_nix.sh not found; skipping"
 fi
 
 say "done"

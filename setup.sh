@@ -123,8 +123,8 @@ cat <<'EOF'
   * Your ~/.oh-my-zsh clone and ~/.tmux.conf are no longer used and can be
     deleted once the new shell looks right.
 
-  * If Exa's Rust builds start missing the cache, re-run
-    ~/Develop/monorepo/bin/setup_nix.sh once. It rewrites the sccache and
-    S3-cache settings, and it is idempotent.
+  * Machine- or work-specific env vars, aliases and paths belong in
+    ~/.zshrc.local (sourced automatically, never tracked here). Credentials
+    belong in ~/.zsh_secrets.
 
 EOF

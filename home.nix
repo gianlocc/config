@@ -15,7 +15,7 @@ in
   # Tools.
   #
   # Language toolchains (node, python, rust, go) deliberately do NOT belong
-  # here -- those come from the monorepo devshells via direnv, and a global
+  # here -- those come from per-project devshells via direnv, and a global
   # copy would shadow the pinned versions there.
   ##############################################################################
   home.packages = with pkgs; [
@@ -34,9 +34,9 @@ in
     nerd-fonts.meslo-lg
   ];
 
-  # Not on the keep-list, but load-bearing: every monorepo devshell loads
+  # Not on the keep-list, but load-bearing: project devshells load
   # through direnv, and setup.sh removes the imperative ~/.nix-profile copy.
-  # Dropping this would break entering any work repo.
+  # Dropping this would break entering any project that uses one.
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
@@ -107,7 +107,6 @@ in
         # Homebrew (casks are declared in darwin.nix).
         [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
 
-        export TILT_NAMESPACE=exan-gianlorenzo
         export UV_PYTHON_PREFERENCE=managed
 
         # Silence direnv's noisy "export +AR +AS ..." dump on directory entry.
@@ -115,12 +114,15 @@ in
         export DIRENV_LOG_FORMAT=""
 
         alias cdev="cd ~/Develop"
-        alias devbox="sh $HOME/Develop/monorepo/personal/gianlo/devbox.sh"
         alias modal="uv run modal"
         alias k="kubectl"
         alias kk="k9s"
 
+        # Machine- and work-specific settings live outside this repo so it can
+        # stay publishable: ~/.zsh_secrets for credentials, ~/.zshrc.local for
+        # employer-specific env vars, aliases and paths. Neither is tracked.
         [[ -r ~/.zsh_secrets ]] && source ~/.zsh_secrets
+        [[ -r ~/.zshrc.local ]] && source ~/.zshrc.local
         [[ -r ~/.safe-chain/scripts/init-posix.sh ]] && source ~/.safe-chain/scripts/init-posix.sh
 
         if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then

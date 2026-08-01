@@ -1,5 +1,5 @@
 {
-  description = "Gianlo's machine config (nix-darwin + home-manager)";
+  description = "macOS machine config (nix-darwin + home-manager)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -13,14 +13,10 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # This machine runs Determinate Nix, which owns /etc/nix/nix.conf.
-    # Its nix-darwin module keeps nix-darwin from fighting over that file.
-    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
   };
 
   outputs =
-    { self, nixpkgs, nix-darwin, home-manager, determinate, ... }:
+    { self, nixpkgs, nix-darwin, home-manager, ... }:
     let
       # One config used on every machine. `bin/sync` always builds `.#default`,
       # so the hostname never has to match. Add per-host attrs here later if
@@ -31,7 +27,6 @@
       darwinConfigurations.default = nix-darwin.lib.darwinSystem {
         specialArgs = { inherit username; };
         modules = [
-          determinate.darwinModules.default
           ./darwin.nix
 
           home-manager.darwinModules.home-manager

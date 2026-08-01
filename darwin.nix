@@ -4,32 +4,18 @@
   nixpkgs.hostPlatform = "aarch64-darwin";
 
   ##############################################################################
-  # Determinate Nix owns /etc/nix/nix.conf.
+  # This machine runs Determinate Nix, which owns /etc/nix/nix.conf.
   #
-  # This is load-bearing, do not flip it. The Exa monorepo's bin/setup_nix.sh
-  # appends the `exa-nix-s3-cache-1` trusted key and the
-  # `extra-sandbox-paths = /tmp/nix-sccache=/var/nix-sccache` sccache setting to
-  # the live nix config. If nix-darwin managed nix.conf it would regenerate the
-  # file on every switch and silently drop both, breaking cache hits and slowing
-  # Rust builds. With `nix.enable = false`, nix-darwin leaves it alone and
-  # setup_nix.sh keeps writing to /etc/nix/nix.custom.conf.
+  # Load-bearing, do not flip it. With `nix.enable = false` nix-darwin does not
+  # generate /etc/nix/nix.conf *or* nix.custom.conf, so whatever else manages
+  # those files (Determinate itself, or a work bootstrap script) keeps its
+  # settings across every switch.
+  #
+  # Note this deliberately does NOT use Determinate's nix-darwin module: that
+  # module regenerates nix.custom.conf on activation, which would silently drop
+  # any setting written there by anything other than this flake.
   ##############################################################################
-  # The module itself does `nix.enable = lib.mkForce false`, so nix-darwin's own
-  # nix.conf generation is off and Determinate stays in charge.
-  determinateNix.enable = true;
-
-  # The module *does* generate /etc/nix/nix.custom.conf -- the same file
-  # setup_nix.sh appends Exa's cache settings to. Anything merely appended there
-  # is wiped on the next switch, so it has to be declared here instead. Note
-  # this is `determinateNix.customSettings`, NOT `nix.settings`; the latter is
-  # silently ignored once the determinate module is in play.
-  determinateNix.customSettings = {
-    trusted-users = [ "root" "@admin" ];
-    extra-substituters = [ "s3://exa-nix-cache?region=us-west-2&priority=50" ];
-    extra-trusted-public-keys = [
-      "exa-nix-s3-cache-1:mxdfgAYd0CqvvfP9XaOnE1i7lrUACRIIt68iShEGKCA="
-    ];
-  };
+  nix.enable = false;
 
   system.stateVersion = 6;
   system.primaryUser = username;
