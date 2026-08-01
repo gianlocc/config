@@ -31,19 +31,24 @@ in
     jq
 
     # --- JavaScript -------------------------------------------------------
-    # Volta used to supply node/npm/pnpm/yarn, but it is no longer on PATH in a
-    # fresh shell, so `node` was simply missing. These replace it. nodejs ships
-    # npm, so npm is not listed separately.
-    nodejs_24
-    pnpm
+    # A version MANAGER, not a pinned node. Volta rather than fnm/nvm because
+    # projects here pin through package.json's "volta" field (the monorepo asks
+    # for node 22.22.0) and there is no .nvmrc anywhere for fnm to read.
+    #
+    # Volta also works by shims rather than a chpwd hook, so it never races
+    # direnv for PATH the way fnm --use-on-cd would.
+    #
+    # node/npm/pnpm/yarn are deliberately NOT listed here -- Volta supplies them
+    # at whatever version the current project asks for.
+    volta
+
+    # Standalone runtime, not something Volta manages, so it is global.
     bun
-    yarn # Volta provided this too; kept so nothing silently disappears
 
     # --- Python -----------------------------------------------------------
-    # 3.13 rather than pkgs.python3, which is currently 3.14 and too new for a
-    # lot of tooling. uv is here because .zshrc sets UV_PYTHON_PREFERENCE=managed
-    # and it manages its own interpreters for projects regardless.
-    python313
+    # Same idea: uv IS the manager. `uv python install 3.13`, `uv venv`,
+    # `uv sync`. .zshrc already sets UV_PYTHON_PREFERENCE=managed, so uv keeps
+    # its own interpreters per project instead of a global pinned python.
     uv
 
     # powerlevel10k renders with POWERLEVEL9K_MODE=nerdfont-v3, so it needs a
@@ -125,6 +130,13 @@ in
 
         # Homebrew (casks are declared in darwin.nix).
         [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+
+        # Volta: shims for node/npm/pnpm/yarn at whatever version the current
+        # project pins. This was previously on PATH by accident and vanished on
+        # the first switch, which is how `node` went missing.
+        # direnv prepends devshells after this, so devshell versions still win.
+        export VOLTA_HOME="$HOME/.volta"
+        export PATH="$VOLTA_HOME/bin:$PATH"
 
         export UV_PYTHON_PREFERENCE=managed
 

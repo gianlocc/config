@@ -85,7 +85,7 @@ subs=$(nix config show substituters 2>/dev/null | tr ' ' '\n' | grep -c . || ech
 ################################################################################
 hdr "packages"
 ################################################################################
-TOOLS="git gh zsh tmux k9s kubectl bat jq direnv node npm pnpm bun yarn python3 uv"
+TOOLS="git gh zsh tmux k9s kubectl bat jq direnv volta bun uv"
 
 P="/etc/profiles/per-user/$USER/bin"
 missing=""

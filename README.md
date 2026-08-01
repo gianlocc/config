@@ -64,8 +64,24 @@ to your other machines on their next `git pull`.
 ## What's installed
 
 **Nix:** `git` · `gh` · `zsh` · `oh-my-zsh` · `powerlevel10k` · `tmux` · `k9s` ·
-`kubectl` · `bat` · `htop` · `jq` · `direnv` · MesloLG Nerd Font, plus the
-`zsh-autosuggestions` / `zsh-syntax-highlighting` plugins.
+`kubectl` · `bat` · `htop` · `jq` · `direnv` · `volta` · `bun` · `uv` ·
+MesloLG Nerd Font, plus the `zsh-autosuggestions` / `zsh-syntax-highlighting`
+plugins.
+
+**Language runtimes are managed, not pinned.** There is deliberately no global
+`node` or `python` package:
+
+- **node/npm/pnpm/yarn → Volta.** Projects pin through `package.json`'s `volta`
+  field (the monorepo asks for node 22.22.0). Volta was chosen over fnm/nvm
+  because nothing here has a `.nvmrc`, and because Volta works via shims rather
+  than a `chpwd` hook — so it never races direnv for PATH. `nvm` itself is a
+  sourced shell function and is not packaged in nixpkgs.
+- **python → uv.** `uv python install 3.13`, `uv venv`, `uv sync`. `.zshrc` sets
+  `UV_PYTHON_PREFERENCE=managed`, so uv keeps its own interpreters per project.
+  A bare `python3` falls back to macOS's 3.9.6.
+- **docker** is left to Docker Desktop, whose CLI is already global and matched
+  to its daemon, with 16 CLI plugins (compose, buildx, scout…) that the nix
+  package does not ship.
 
 **Homebrew casks:** `cmux` (not in nixpkgs, so brew is the only declarative
 option). `onActivation.cleanup = "none"` guarantees nothing not listed is ever
