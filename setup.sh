@@ -92,13 +92,23 @@ else
 fi
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# cmux is already in /Applications from a manual install. brew refuses to
-# install over an existing app, so adopt it first -- otherwise the switch fails
-# with "It seems there is already an App at /Applications/cmux.app".
-if [[ -d /Applications/cmux.app ]] && ! brew list --cask cmux >/dev/null 2>&1; then
-  echo "adopting the existing /Applications/cmux.app into brew..."
-  brew install --cask --adopt cmux || warn "adopt failed; remove /Applications/cmux.app and re-run"
-fi
+# Most of these apps were installed by hand, and brew refuses to install over
+# an existing app ("It seems there is already an App at ..."), which would fail
+# the switch. `--adopt` takes ownership of what's already there instead.
+#
+# The cask list is read back out of the flake so this never drifts from
+# darwin.nix. --adopt is harmless when the app isn't installed yet.
+CASKS=$(nix eval --json "$REPO#darwinConfigurations.default.config.homebrew.casks" 2>/dev/null |
+  tr -d '[]"' | tr ',' ' ')
+for cask in $CASKS; do
+  if brew list --cask "$cask" >/dev/null 2>&1; then
+    echo "already brew-managed: $cask"
+  else
+    echo "adopting/installing cask: $cask"
+    brew install --cask --adopt "$cask" ||
+      warn "could not install '$cask'; the switch may fail until this is resolved"
+  fi
+done
 
 ################################################################################
 say "5/6  applying the config"

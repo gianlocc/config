@@ -56,7 +56,10 @@
   ##############################################################################
   homebrew = {
     enable = true;
-    casks = [ "cmux" ];
+    casks = [
+      "cmux"
+      "visual-studio-code"
+    ];
     onActivation = {
       cleanup = "none"; # never touch apps that aren't listed above
       autoUpdate = false; # don't run `brew update` on every switch
