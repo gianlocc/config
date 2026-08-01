@@ -148,6 +148,33 @@ in
   home.file.".config/cmux/cmux.json".source =
     config.lib.file.mkOutOfStoreSymlink "${repo}/dotfiles/cmux.json";
 
+  # Referenced by dotfiles/gitconfig as core.excludesfile. Tracking the
+  # gitconfig without this left a dangling reference on a fresh machine.
+  home.file.".gitignore_global".source =
+    config.lib.file.mkOutOfStoreSymlink "${repo}/dotfiles/gitignore_global";
+
+  # Whole directory: config references shaders/cursor_warp.glsl, so the shaders
+  # have to travel with it or the config is broken on a new machine.
+  home.file.".config/ghostty".source =
+    config.lib.file.mkOutOfStoreSymlink "${repo}/dotfiles/ghostty";
+
+  ##############################################################################
+  # Claude Code.
+  #
+  # Individual files ONLY -- never the whole ~/.claude directory. That also
+  # holds credentials, 1.4MB of history.jsonl, 26 project transcripts, session
+  # state and shell snapshots, none of which belong in a git repo.
+  #
+  # The binary is not managed by nix or brew; see setup.sh for why.
+  ##############################################################################
+  home.file.".claude/settings.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${repo}/dotfiles/claude/settings.json";
+
+  # Note: work-book rewrites this file between its marker comments, so it will
+  # show up as a repo change whenever that runs. That is expected.
+  home.file.".claude/CLAUDE.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${repo}/dotfiles/claude/CLAUDE.md";
+
   ##############################################################################
   # claude-code -- intentionally NOT installed.
   #

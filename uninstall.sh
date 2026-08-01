@@ -65,8 +65,9 @@ restore() {
   fi
 }
 
-for f in .zshrc .zshenv .zprofile .gitconfig .p10k.zsh \
-  .config/cmux/cmux.json .config/tmux/tmux.conf; do
+for f in .zshrc .zshenv .zprofile .gitconfig .p10k.zsh .gitignore_global \
+  .config/cmux/cmux.json .config/tmux/tmux.conf .config/ghostty \
+  .claude/settings.json .claude/CLAUDE.md; do
   restore "$f"
 done
 

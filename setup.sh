@@ -35,13 +35,13 @@ if ! sudo -n true 2>/dev/null; then
     echo "      $REPO/setup.sh"
     exit 1
   fi
-  say "0/6  sudo"
+  say "0/7  sudo"
   echo "several steps need root; authenticating once up front..."
   sudo -v || { warn "could not authenticate"; exit 1; }
 fi
 
 ################################################################################
-say "1/6  Nix"
+say "1/7  Nix"
 ################################################################################
 if command -v nix >/dev/null 2>&1; then
   echo "already installed: $(nix --version)"
@@ -54,7 +54,7 @@ else
 fi
 
 ################################################################################
-say "2/6  git hooks"
+say "2/7  git hooks"
 ################################################################################
 # Repo-local, so it overrides the global core.hooksPath (which points at
 # work-book/githooks) for this repo only. Tracked in git, so a fresh clone
@@ -64,7 +64,7 @@ chmod +x hooks/* bin/* setup.sh
 echo "core.hooksPath -> hooks/  (post-merge, post-rewrite)"
 
 ################################################################################
-say "3/6  backing up nix.conf"
+say "3/7  backing up nix.conf"
 ################################################################################
 # This config sets nix.enable = false precisely so nix-darwin never rewrites
 # /etc/nix/nix.conf. Snapshot it anyway before the first switch.
@@ -79,7 +79,7 @@ if [[ -f /etc/nix/nix.conf ]]; then
 fi
 
 ################################################################################
-say "4/6  Homebrew"
+say "4/7  Homebrew"
 ################################################################################
 # darwin.nix declares casks, and the homebrew module needs brew to already
 # exist at switch time.
@@ -113,12 +113,30 @@ for cask in $CASKS; do
 done
 
 ################################################################################
-say "5/6  applying the config"
+say "5/7  Claude Code"
+################################################################################
+# Deliberately NOT installed via nix or brew. nixpkgs ships 2.1.39 and the brew
+# cask 2.1.212, while the native installer self-updates continuously (2.1.218 ->
+# .219 -> .220 within days here). A pinned package would sit behind and fight
+# the built-in updater, which cannot write into a read-only nix store anyway.
+#
+# So: bootstrap it with the official installer, then let it update itself. Only
+# its config is version-controlled, in dotfiles/claude/.
+if command -v claude >/dev/null 2>&1 || [[ -x "$HOME/.local/bin/claude" ]]; then
+  echo "already installed: $("$HOME/.local/bin/claude" --version 2>/dev/null || echo present)"
+else
+  echo "installing Claude Code..."
+  curl -fsSL https://claude.ai/install.sh | bash ||
+    warn "Claude Code install failed; see https://docs.claude.com/en/docs/claude-code"
+fi
+
+################################################################################
+say "6/7  applying the config"
 ################################################################################
 "$REPO/bin/sync" --force
 
 ################################################################################
-say "6/6  cleaning up imperative installs"
+say "7/7  cleaning up imperative installs"
 ################################################################################
 # These are now declared in home.nix. Leaving the `nix profile` copies around
 # means two sources of truth and a stale binary shadowing the managed one.

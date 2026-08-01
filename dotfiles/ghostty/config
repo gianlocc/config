@@ -1,0 +1,8 @@
+# Block cursor (thin bar is the default). no-cursor stops shells forcing a bar at the prompt.
+cursor-style = block
+shell-integration-features = no-cursor
+
+# Gliding cursor trail (Neovide-like). Swap to cursor_sweep.glsl / cursor_tail.glsl to taste.
+custom-shader = shaders/cursor_warp.glsl
+# Keep animating when unfocused (line cursor turns hollow → would otherwise freeze).
+custom-shader-animation = always

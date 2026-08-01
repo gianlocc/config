@@ -40,7 +40,7 @@ successful apply, so a pull with no config changes costs nothing.
 | `flake.nix` | inputs + the single `darwinConfigurations.default` |
 | `darwin.nix` | system-level: macOS defaults, Touch ID sudo, Homebrew casks |
 | `home.nix` | user-level: packages, zsh/omz/p10k, dotfile symlinks |
-| `dotfiles/` | `.gitconfig`, `.p10k.zsh`, `cmux.json` — symlinked into `$HOME` |
+| `dotfiles/` | gitconfig, gitignore_global, p10k.zsh, cmux.json, ghostty/, claude/ — symlinked into `$HOME` |
 
 ## What's installed
 
@@ -52,9 +52,16 @@ successful apply, so a pull with no config changes costs nothing.
 option). `onActivation.cleanup = "none"` guarantees nothing not listed is ever
 uninstalled — important, since most apps here were installed by hand.
 
-**Not installed on purpose:** `claude-code`. nixpkgs ships 2.1.39 while the
-self-updating install in `~/.local/share/claude/versions` is far ahead; adding
-it would shadow the newer build with an older one. Left commented in `home.nix`.
+**Claude Code** is bootstrapped by `setup.sh` using the official installer,
+then left to update itself. It is deliberately not a nix or brew package:
+nixpkgs ships 2.1.39 and the brew cask 2.1.212, while the native install moves
+continuously (2.1.218 → .219 → .220 within days). A pinned package would lag and
+fight the built-in updater, which cannot write into a read-only nix store. Only
+its config is tracked, in `dotfiles/claude/`.
+
+Only `settings.json` and `CLAUDE.md` are symlinked — never the whole `~/.claude`
+directory, which also holds credentials, ~1.4MB of `history.jsonl` and 26
+project transcripts.
 
 ## Load-bearing details
 
