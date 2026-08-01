@@ -18,28 +18,38 @@
   outputs =
     { self, nixpkgs, nix-darwin, home-manager, ... }:
     let
-      # One config used on every machine. `bin/sync` always builds `.#default`,
-      # so the hostname never has to match. Add per-host attrs here later if
-      # two machines ever need to differ.
-      username = "gianlo_exa";
+      # One shared config, built per macOS account. Flakes evaluate purely and
+      # cannot read $USER, so each account gets its own attribute and `bin/sync`
+      # selects `.#$USER` (falling back to `.#default`).
+      #
+      # Adding a machine with a different account name = add it to `accounts`.
+      accounts = [
+        "gianlo_exa"
+        "gianlo_personal"
+      ];
+
+      mkDarwin = username:
+        nix-darwin.lib.darwinSystem {
+          specialArgs = { inherit username; };
+          modules = [
+            ./darwin.nix
+
+            home-manager.darwinModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.extraSpecialArgs = { inherit username; };
+              home-manager.users.${username} = import ./home.nix;
+              # First switch moves pre-existing ~/.zshrc etc. aside instead of
+              # erroring out.
+              home-manager.backupFileExtension = "hm-bak";
+            }
+          ];
+        };
     in
     {
-      darwinConfigurations.default = nix-darwin.lib.darwinSystem {
-        specialArgs = { inherit username; };
-        modules = [
-          ./darwin.nix
-
-          home-manager.darwinModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = { inherit username; };
-            home-manager.users.${username} = import ./home.nix;
-            # First switch moves pre-existing ~/.zshrc etc. aside instead of
-            # erroring out.
-            home-manager.backupFileExtension = "hm-bak";
-          }
-        ];
-      };
+      darwinConfigurations =
+        (nixpkgs.lib.genAttrs accounts mkDarwin)
+        // { default = mkDarwin (builtins.head accounts); };
     };
 }

@@ -21,7 +21,13 @@ warn() { printf '\n\033[1;33m!!  %s\033[0m\n' "$*"; }
 EXPECTED="$HOME/Develop/configs"
 if [[ "$REPO" != "$EXPECTED" ]]; then
   warn "this repo must live at $EXPECTED (found: $REPO)"
-  warn "move it there and re-run, or change \`repo\` in home.nix to match."
+  echo
+  echo "  The GitHub repo is named 'config' but the directory must be 'configs'"
+  echo "  (home.nix points every dotfile symlink at that path). Fix with:"
+  echo
+  echo "      mv \"$REPO\" \"$EXPECTED\""
+  echo "      $EXPECTED/setup.sh"
+  echo
   exit 1
 fi
 
