@@ -118,14 +118,17 @@ in
         alias k="kubectl"
         alias kk="k9s"
 
-        # Claude Code. Resolved at call time, so inside cmux this picks up the
-        # shim cmux injects ahead of ~/.local/bin (which is how its Claude Code
-        # integration hooks in), and outside cmux it runs the binary directly.
+        # cmux CLI. The `cmux` binary comes from the cask, symlinked to
+        # /opt/homebrew/bin/cmux and picked up by the brew shellenv line above.
         #
-        # This shadows /usr/bin/cc (Apple clang) -- but only on the interactive
-        # command line. make/cargo/nix exec `cc` directly and are unaffected.
-        # Use `command cc` or /usr/bin/cc if you ever want the compiler here.
-        alias cc="claude"
+        # `cc` shadows /usr/bin/cc (Apple clang), but only on the interactive
+        # command line -- make/cargo/nix exec `cc` directly and are unaffected.
+        # Use `command cc` or /usr/bin/cc if you want the compiler here.
+        alias cc="cmux claude-teams"
+
+        # Opens a new workspace marked remote-SSH and starts the session there.
+        # Takes a destination: cssh user@host
+        alias cssh="cmux ssh"
 
         # Machine- and work-specific settings live outside this repo so it can
         # stay publishable: ~/.zsh_secrets for credentials, ~/.zshrc.local for
