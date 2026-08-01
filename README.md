@@ -19,6 +19,8 @@ the config. The clone path matters — see *Load-bearing details* below.
 | `git pull` | applies any change that came down, automatically |
 | `bin/sync --force` | applies uncommitted local edits |
 | `darwin-rebuild --rollback` | undoes the last switch |
+| `bin/doctor` | read-only health check; exits 1 on any failure |
+| `bin/update` | move package versions forward, then apply |
 | `./uninstall.sh` | rolls back, restores dotfiles, unhooks git |
 | `./uninstall.sh --purge` | the above, plus removes nix-darwin entirely |
 
@@ -32,6 +34,23 @@ The automatic part is `core.hooksPath = hooks/` (set by `setup.sh`), plus:
 
 Both call `bin/sync`, which no-ops when `HEAD` hasn't moved since the last
 successful apply, so a pull with no config changes costs nothing.
+
+## How updates work
+
+`git pull` applies config **changes**. It does not move package **versions** —
+those are pinned, so a pull never surprises you with a new toolchain. There are
+four separate update channels:
+
+| what | pinned by | how it moves |
+| --- | --- | --- |
+| nix packages (git, zsh, tmux, k9s, jq, fonts, omz, p10k…) | `flake.lock` | `bin/update` (runs `nix flake update` + applies) |
+| Homebrew casks (cmux, VS Code) | nothing — but `onActivation.upgrade = false` | `bin/update --casks` |
+| Claude Code | not pinned | self-updates; deliberately unmanaged |
+| hand-installed apps | not pinned | their own updaters |
+
+`bin/update --dry` shows what would move without changing anything. After a
+successful update, commit `flake.lock` — that is what carries the same versions
+to your other machines on their next `git pull`.
 
 ## Layout
 
