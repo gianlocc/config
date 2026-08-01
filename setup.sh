@@ -25,6 +25,21 @@ if [[ "$REPO" != "$EXPECTED" ]]; then
   exit 1
 fi
 
+# Several steps below need root. Check once, up front, rather than dying
+# halfway through: without a controlling terminal sudo cannot prompt at all,
+# which is what happens when this is run from an editor or agent shell.
+if ! sudo -n true 2>/dev/null; then
+  if [[ ! -t 0 ]]; then
+    warn "this needs sudo, but there is no terminal to prompt on."
+    warn "run it from a real terminal window (Ghostty, cmux, Terminal.app):"
+    echo "      $REPO/setup.sh"
+    exit 1
+  fi
+  say "0/6  sudo"
+  echo "several steps need root; authenticating once up front..."
+  sudo -v || { warn "could not authenticate"; exit 1; }
+fi
+
 ################################################################################
 say "1/6  Nix"
 ################################################################################
